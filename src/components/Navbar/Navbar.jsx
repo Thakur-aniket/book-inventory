@@ -1,41 +1,94 @@
-import React, {useState} from 'react';
-import { Link } from 'react-router-dom';
-import "./Navbar.css";
-import logoImg from "../../images/logo.png";
-import {HiOutlineMenuAlt3} from "react-icons/hi";
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import './Navbar.css';
 
 const Navbar = () => {
-  const [toggleMenu, setToggleMenu] = useState(false);
-  const handleNavbar = () => setToggleMenu(!toggleMenu);
+  const { isAuthenticated, logout } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  // Close menu when route changes
+  useEffect(() => {
+    closeMenu();
+  }, [location]);
 
   return (
-    <nav className='navbar' id = "navbar">
-      <div className='container navbar-content flex'>
-        <div className='brand-and-toggler flex flex-sb'>
-          <Link to = "/" className='navbar-brand flex'>
-            <img src = {logoImg} alt = "site logo" />
-            <span className='text-uppercase fw-7 fs-24 ls-1'>bookhub</span>
-          </Link>
-          <button type = "button" className='navbar-toggler-btn' onClick={handleNavbar}>
-            <HiOutlineMenuAlt3 size = {35} style = {{
-              color: `${toggleMenu ? "#fff" : "#010101"}`
-            }} />
-          </button>
-        </div>
+    <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
+      <div className="navbar-content">
+        <Link to="/" className="navbar-brand">
+          <i className="fas fa-book"></i>
+          BookLib
+        </Link>
 
-        <div className={toggleMenu ? "navbar-collapse show-navbar-collapse" : "navbar-collapse"}>
-          <ul className = "navbar-nav">
-            <li className='nav-item'>
-              <Link to = "book" className='nav-link text-uppercase text-white fs-22 fw-6 ls-1'>Home</Link>
-            </li>
-            <li className='nav-item'>
-              <Link to = "about" className='nav-link text-uppercase text-white fs-22 fw-6 ls-1'>about</Link>
-            </li>
-          </ul>
+        <button className="navbar-toggler" onClick={toggleMenu}>
+          <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+        </button>
+
+        <div className={`navbar-items ${isMenuOpen ? 'show' : ''}`}>
+          <Link to="/" className="navbar-link" onClick={closeMenu}>
+            <i className="fas fa-home"></i>
+            Home
+          </Link>
+          <Link to="/book" className="navbar-link" onClick={closeMenu}>
+            <i className="fas fa-book-open"></i>
+            Books
+          </Link>
+          <Link to="/about" className="navbar-link" onClick={closeMenu}>
+            <i className="fas fa-info-circle"></i>
+            About
+          </Link>
+
+          {isAuthenticated ? (
+            <div className="profile-menu">
+              <div className="navbar-link">
+                <i className="fas fa-user"></i>
+                Profile
+              </div>
+              <div className="dropdown-menu">
+                <Link to="/profile" className="dropdown-item">
+                  <i className="fas fa-user-circle"></i>
+                  My Profile
+                </Link>
+                <Link to="/cart" className="dropdown-item">
+                  <i className="fas fa-shopping-cart"></i>
+                  Cart
+                </Link>
+                <div className="dropdown-divider"></div>
+                <button onClick={logout} className="dropdown-item">
+                  <i className="fas fa-sign-out-alt"></i>
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Link to="/login" className="navbar-link" onClick={closeMenu}>
+              <i className="fas fa-sign-in-alt"></i>
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

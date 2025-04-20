@@ -1,14 +1,25 @@
 import React from 'react';
-import Header from '../../components/Header/Header';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import './Home.css';
 
 const Home = () => {
-  return (
-    <main>
-        <Header />
-        <Outlet />
-    </main>
-  )
-}
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
-export default Home
+  return (
+    <div className="home">
+      {isHomePage && (
+        <div className="hero">
+          <div className="hero-content">
+            <h1>Welcome to BookLib</h1>
+            <p>Discover your next favorite book</p>
+            <a href="/book" className="cta-button">Browse Books</a>
+          </div>
+        </div>
+      )}
+      <Outlet />
+    </div>
+  );
+};
+
+export default Home;
